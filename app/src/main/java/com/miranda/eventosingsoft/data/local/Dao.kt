@@ -15,21 +15,14 @@ import kotlinx.coroutines.flow.Flow
 
 // Establecemos la interfaz como un componente de acceso a datos para Room.
 @Dao
-interface ItemDao {
+interface EventoDao {
+    @Query("SELECT * FROM eventos")
+    fun getAllEvents(): Flow<List<EventoEntity>>
 
-    // Retorna un Flow para permitir una UI reactiva en Jetpack Compose.
-    @Query("SELECT * FROM items")
-    fun getAllItems(): Flow<List<ItemEntity>>
-
-    @Query("SELECT * FROM items WHERE id = :id")
-    fun getItemById(id: Int): Flow<ItemEntity>
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE) // Si el ID ya existe, lo reemplaza.
-    suspend fun insert(item: ItemEntity)
-
-    @Update
-    suspend fun update(item: ItemEntity)
+    //Si el id ya existe lo remplaza
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertEvento(evento: EventoEntity)
 
     @Delete
-    suspend fun delete(item: ItemEntity)
+    suspend fun deleteEvento(evento: EventoEntity)
 }
