@@ -1,68 +1,99 @@
 package com.miranda.eventosingsoft.ui.screens.create
-
+import com.miranda.eventosingsoft.ui.screens.create.CreateViewModel
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CrearEventoScreen(onNavigateBack: () -> Unit) {
+fun CrearEventoScreen(
+    // Asegúrate de que tu inyección de dependencias o Factory esté configurada
+    // Si te marca error aquí, es normal hasta que configuremos el ViewModelFactory
+    viewModel: CreateViewModel,
+    onNavigateBack: () -> Unit
+
+) {
+    // Variables de estado para capturar lo que el usuario escribe
     var titulo by remember { mutableStateOf("") }
     var descripcion by remember { mutableStateOf("") }
-    var categoria by remember { mutableStateOf("") }
+    var fecha by remember { mutableStateOf("") }
     var ubicacion by remember { mutableStateOf("") }
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(title = { Text("Creacion Del Evento", color = Color(0xFF6750A4), fontWeight = FontWeight.Bold) })
+            TopAppBar(
+                title = { Text("Añadir Nuevo Evento") },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Regresar")
+                    }
+                }
+            )
         }
-    ) { innerPadding ->
+    ) { paddingValues ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(innerPadding).padding(horizontal = 32.dp).verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            CustomTextField("Titulo", titulo) { titulo = it }
-            CustomTextField("Descripcion", descripcion) { descripcion = it }
-            CustomTextField("Categoria", categoria) { categoria = it }
-            CustomTextField("Ubicacion", ubicacion) { ubicacion = it }
+            // Campo para el Título
+            OutlinedTextField(
+                value = titulo,
+                onValueChange = { titulo = it },
+                label = { Text("Título del Evento") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
 
-            Text("Fecha", fontWeight = FontWeight.Medium)
-            Text("00/12/0000", color = Color.Gray)
+            // Campo para la Descripción
+            OutlinedTextField(
+                value = descripcion,
+                onValueChange = { descripcion = it },
+                label = { Text("Descripción") },
+                modifier = Modifier.fillMaxWidth(),
+                minLines = 3
+            )
 
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                IconButton(onClick = onNavigateBack, modifier = Modifier.size(60.dp)) {
-                    Surface(shape = androidx.compose.foundation.shape.CircleShape, color = Color(0xFF7B61FF)) {
-                        Icon(Icons.Default.ArrowBack, null, tint = Color.White, modifier = Modifier.padding(12.dp))
+            // Campo para la Fecha
+            OutlinedTextField(
+                value = fecha,
+                onValueChange = { fecha = it },
+                label = { Text("Fecha (ej. 12 de Octubre)") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
+
+            // Campo para la Ubicación
+            OutlinedTextField(
+                value = ubicacion,
+                onValueChange = { ubicacion = it },
+                label = { Text("Ubicación / Lugar") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            // Botón de Guardar
+            Button(
+                onClick = {
+                    if (titulo.isNotBlank()) {
+                        viewModel.guardarNuevoEvento(titulo, descripcion, fecha, ubicacion)
+                        onNavigateBack() // Regresa al Home tras guardar
                     }
                 }
-                IconButton(onClick = { }, modifier = Modifier.size(60.dp)) {
-                    Surface(shape = androidx.compose.foundation.shape.CircleShape, color = Color(0xFF27AE60)) {
-                        Icon(Icons.Default.Add, null, tint = Color.White, modifier = Modifier.padding(12.dp))
-                    }
-                }
-            }
+            ) { Text("Guardar Evento") }
         }
     }
 }
 
-@Composable
-fun CustomTextField(label: String, value: String, onValueChange: (String) -> Unit) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(label, fontSize = 18.sp)
-        Surface(color = Color(0xFFEEEEEE), modifier = Modifier.fillMaxWidth().height(45.dp), shape = MaterialTheme.shapes.small) {
-            TextField(value = value, onValueChange = onValueChange, singleLine = true, colors = TextFieldDefaults.colors(focusedContainerColor = Color.Transparent, unfocusedContainerColor = Color.Transparent, focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent))
-        }
-    }
-}

@@ -5,11 +5,11 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "eventos")
 data class EventoEntity(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0, // El 0 le dice al Room que genere el ID en auto
     val titulo: String,
     val descripcion: String,
-    val categoria: String,
-    val ubicacion: String,
     val fecha: String,
-    val isFavorite: Boolean = false
+    val ubicacion: String,
+    val esFavorito: Boolean = false
 )

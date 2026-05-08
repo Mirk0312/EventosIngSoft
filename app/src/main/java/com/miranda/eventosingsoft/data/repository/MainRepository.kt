@@ -4,11 +4,14 @@ import com.miranda.eventosingsoft.data.local.EventoDao
 import com.miranda.eventosingsoft.data.local.EventoEntity
 import kotlinx.coroutines.flow.Flow
 
-class MainRepository(private val eventoDao: EventoDao) {
-    // Esto conecta la base de datos con el ViewModel
-    val allEvents: Flow<List<EventoEntity>> = eventoDao.getAllEvents()
+class MainRepository(private val dao: EventoDao) {
+    val listaEventos: Flow<List<EventoEntity>> = dao.obtenerEventos()
 
-    suspend fun insert(evento: EventoEntity) {
-        eventoDao.insertEvento(evento)
+    suspend fun insertarEvento(evento: EventoEntity) {
+        dao.insertarEvento(evento)
+    }
+
+    suspend fun cambiarFavorito(evento: EventoEntity) {
+        dao.actualizarEvento(evento.copy(esFavorito = !evento.esFavorito))
     }
 }
