@@ -17,7 +17,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
 
-            // Nombre de tu tema generado al crear el proyecto
+            // Nombre de tu tema
             EventosIngSoftTheme {
                 val navController = rememberNavController()
 

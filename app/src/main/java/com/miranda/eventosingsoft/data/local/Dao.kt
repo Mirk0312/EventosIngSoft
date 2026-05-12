@@ -8,6 +8,9 @@ interface EventoDao {
     @Query("SELECT * FROM eventos ORDER BY id DESC")
     fun obtenerEventos(): Flow<List<EventoEntity>>
 
+    @Query("SELECT * FROM eventos WHERE id = :id")
+    fun obtenerEventoPorId(id: Int): Flow<EventoEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertarEvento(evento: EventoEntity)
 

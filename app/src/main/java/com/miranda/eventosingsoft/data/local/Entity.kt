@@ -11,5 +11,6 @@ data class EventoEntity(
     val descripcion: String,
     val fecha: String,
     val ubicacion: String,
-    val esFavorito: Boolean = false
+    val esFavorito: Boolean = false,
+    val imagenUri: String? = null
 )

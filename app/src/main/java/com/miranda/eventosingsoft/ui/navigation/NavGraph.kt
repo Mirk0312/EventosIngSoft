@@ -1,6 +1,7 @@
 package com.miranda.eventosingsoft.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -14,56 +15,88 @@ import com.miranda.eventosingsoft.ui.screens.favorite.FavoritosScreen
 import com.miranda.eventosingsoft.ui.screens.create.CrearEventoScreen
 import com.miranda.eventosingsoft.ui.screens.create.CreateViewModel
 import com.miranda.eventosingsoft.ui.screens.detail.DetailScreen
+import com.miranda.eventosingsoft.ui.screens.detail.DetailViewModel
+import com.miranda.eventosingsoft.ui.screens.splash.SplashScreen
 
 @Composable
 fun NavGraph(navController: NavHostController) {
+    val contexto = LocalContext.current
+    val app = contexto.applicationContext as EventosApp
+
+    val sharedHomeViewModel = remember { HomeViewModel(app.repository) }
+
     NavHost(
         navController = navController,
-        startDestination = "home"
+        startDestination = "splash"
     ) {
-        composable("home") {
-            val contexto = LocalContext.current
-            val app = contexto.applicationContext as EventosApp
-            val viewModel = HomeViewModel(app.repository)
+        // ruta del Splash Screen
+        composable("splash") {
+            SplashScreen(onNavigateToHome = {
+                navController.navigate("home") {
+                    popUpTo("splash") { inclusive = true }
+                }
+            })
+        }
 
+        // ruta de Pantalla Principal
+        composable("home") {
             HomeScreen(
-                viewModel = viewModel,
+                viewModel = sharedHomeViewModel,
                 onNavigateToDetail = { id -> navController.navigate("detail/$id") },
                 onNavigateToCreate = { navController.navigate("create") },
                 onNavigateToFavorites = { navController.navigate("favorites") }
             )
         }
 
+        // Ruta de Favoritos
         composable("favorites") {
-            val contexto = LocalContext.current
-            val app = contexto.applicationContext as EventosApp
-            val viewModel = HomeViewModel(app.repository)
-
             FavoritosScreen(
-                viewModel = viewModel,
-                onNavigateBack = { navController.popBackStack() }
+                viewModel = sharedHomeViewModel,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToDetail = { id ->
+                    navController.navigate("detail/$id")
+                }
             )
         }
 
+        // ruta de Crear Nuevos Eventos
         composable("create") {
-            val contexto = LocalContext.current
-            val app = contexto.applicationContext as EventosApp
-            val createViewModel = CreateViewModel(app.repository)
-
+            val createViewModel = remember { CreateViewModel(app.repository) }
             CrearEventoScreen(
                 viewModel = createViewModel,
-                onNavigateBack = { navController.popBackStack() }
+                onNavigateBack = { navController.popBackStack() },
+                eventoId = null
             )
         }
 
+        // ruta Detalles del Evento
         composable(
             route = "detail/{eventoId}",
             arguments = listOf(navArgument("eventoId") { type = NavType.IntType })
         ) { backStackEntry ->
             val id = backStackEntry.arguments?.getInt("eventoId") ?: 0
+            val detailViewModel = remember { DetailViewModel(app.repository) }
+
             DetailScreen(
                 eventoId = id,
-                onNavigateBack = { navController.popBackStack() }
+                viewModel = detailViewModel,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToEdit = { eventoId -> navController.navigate("edit/$eventoId") }
+            )
+        }
+
+        // ruta de Editar Evento
+        composable(
+            route = "edit/{eventoId}",
+            arguments = listOf(navArgument("eventoId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val id = backStackEntry.arguments?.getInt("eventoId") ?: 0
+            val createViewModel = remember { CreateViewModel(app.repository) }
+
+            CrearEventoScreen(
+                viewModel = createViewModel,
+                onNavigateBack = { navController.popBackStack() },
+                eventoId = id
             )
         }
     }

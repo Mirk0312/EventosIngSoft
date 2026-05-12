@@ -18,4 +18,10 @@ class HomeViewModel(private val repository: MainRepository) : ViewModel() {
             repository.cambiarFavorito(evento)
         }
     }
+
+    fun borrarEvento(evento: EventoEntity) {
+        viewModelScope.launch {
+            repository.eliminarEvento(evento)
+        }
+    }
 }

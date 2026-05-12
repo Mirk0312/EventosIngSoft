@@ -11,7 +11,17 @@ class MainRepository(private val dao: EventoDao) {
         dao.insertarEvento(evento)
     }
 
+    suspend fun actualizarEvento(evento: EventoEntity) = dao.actualizarEvento(evento)
+
+    suspend fun eliminarEvento(evento: EventoEntity) = dao.eliminarEvento(evento)
+
     suspend fun cambiarFavorito(evento: EventoEntity) {
         dao.actualizarEvento(evento.copy(esFavorito = !evento.esFavorito))
     }
+    fun obtenerEventoPorId(id: Int): Flow<EventoEntity> {
+            return dao.obtenerEventoPorId(id)
+    }
+
+
+
 }
