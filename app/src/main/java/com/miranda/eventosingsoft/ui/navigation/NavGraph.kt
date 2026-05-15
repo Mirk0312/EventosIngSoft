@@ -23,53 +23,44 @@ fun NavGraph(navController: NavHostController) {
     val contexto = LocalContext.current
     val app = contexto.applicationContext as EventosApp
 
+    // Compartimos el HomeViewModel para que favoritos y home vean los mismos datos
     val sharedHomeViewModel = remember { HomeViewModel(app.repository) }
 
     NavHost(
         navController = navController,
         startDestination = "splash"
     ) {
-        // ruta del Splash Screen
+        //seccion del splashScreen
         composable("splash") {
             SplashScreen(onNavigateToHome = {
                 navController.navigate("home") {
+                    // Evita que el usuario regrese al Splash con el botón de atrás
                     popUpTo("splash") { inclusive = true }
                 }
             })
         }
 
-        // ruta de Pantalla Principal
+        //seccion de la pantalla principal
         composable("home") {
             HomeScreen(
                 viewModel = sharedHomeViewModel,
                 onNavigateToDetail = { id -> navController.navigate("detail/$id") },
-                onNavigateToCreate = { navController.navigate("create") },
+                // Enviamos 0 para indicar que es un nuevo evento
+                onNavigateToCreate = { navController.navigate("create_edit/0") },
                 onNavigateToFavorites = { navController.navigate("favorites") }
             )
         }
 
-        // Ruta de Favoritos
+        //seccion de favoritos
         composable("favorites") {
             FavoritosScreen(
                 viewModel = sharedHomeViewModel,
                 onNavigateBack = { navController.popBackStack() },
-                onNavigateToDetail = { id ->
-                    navController.navigate("detail/$id")
-                }
+                onNavigateToDetail = { id -> navController.navigate("detail/$id") }
             )
         }
 
-        // ruta de Crear Nuevos Eventos
-        composable("create") {
-            val createViewModel = remember { CreateViewModel(app.repository) }
-            CrearEventoScreen(
-                viewModel = createViewModel,
-                onNavigateBack = { navController.popBackStack() },
-                eventoId = null
-            )
-        }
-
-        // ruta Detalles del Evento
+        //seccion de detalles del evento
         composable(
             route = "detail/{eventoId}",
             arguments = listOf(navArgument("eventoId") { type = NavType.IntType })
@@ -81,22 +72,32 @@ fun NavGraph(navController: NavHostController) {
                 eventoId = id,
                 viewModel = detailViewModel,
                 onNavigateBack = { navController.popBackStack() },
-                onNavigateToEdit = { eventoId -> navController.navigate("edit/$eventoId") }
+                // Navegamos a la ruta unificada de edición
+                onNavigateToEdit = { eventoId -> navController.navigate("create_edit/$eventoId") }
             )
         }
 
-        // ruta de Editar Evento
+        // seccion de crear y editar
+        // Usamos una sola definición para evitar duplicar código de ViewModels
         composable(
-            route = "edit/{eventoId}",
-            arguments = listOf(navArgument("eventoId") { type = NavType.IntType })
+            route = "create_edit/{eventoId}",
+            arguments = listOf(
+                navArgument("eventoId") {
+                    type = NavType.IntType
+                    defaultValue = 0 // 0 significa "Nuevo"
+                }
+            )
         ) { backStackEntry ->
             val id = backStackEntry.arguments?.getInt("eventoId") ?: 0
             val createViewModel = remember { CreateViewModel(app.repository) }
 
             CrearEventoScreen(
                 viewModel = createViewModel,
-                onNavigateBack = { navController.popBackStack() },
-                eventoId = id
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                // Si el id es 0, pasamos null para que la pantalla sepa que es nuevo
+                eventoId = if (id == 0) null else id
             )
         }
     }

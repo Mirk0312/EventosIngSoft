@@ -1,15 +1,11 @@
 package com.miranda.eventosingsoft.ui.screens.create
-
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.miranda.eventosingsoft.data.repository.MainRepository
 import com.miranda.eventosingsoft.data.local.EventoEntity
 import kotlinx.coroutines.launch
-
 class CreateViewModel(private val repository: MainRepository) : ViewModel() {
-
-    // Modificamos la función para que acepte un ID (por si editamos)
-    // y la imagenUri (para la foto)
+    // Modificamos la función para que acepte un ID (por si editamos) y la imagenUri (para la foto)
     fun guardarEvento(
         id: Int = 0, // Si es 0 es nuevo, si es diferente es edición
         titulo: String,
@@ -28,7 +24,6 @@ class CreateViewModel(private val repository: MainRepository) : ViewModel() {
                 imagenUri = imagenUri, // Guardamos lo que es la ruta de la foto
                 esFavorito = false
             )
-
             if (id == 0) {
                 repository.insertarEvento(evento)
             } else {
@@ -36,9 +31,18 @@ class CreateViewModel(private val repository: MainRepository) : ViewModel() {
             }
         }
     }
-    fun eliminarEvento(evento: EventoEntity) {
+    fun eliminarEvento(id: Int) {
         viewModelScope.launch {
-            repository.eliminarEvento(evento)
+            // Creamos un objeto temporal con ese ID para que el repositorio sepa qué borrar
+            val eventoAEliminar = EventoEntity(
+                id = id,
+                titulo = "",
+                descripcion = "",
+                fecha = "",
+                ubicacion = "",
+                esFavorito = false
+            )
+            repository.eliminarEvento(eventoAEliminar)
         }
     }
     fun obtenerEventoPorId(id: Int) = repository.obtenerEventoPorId(id)

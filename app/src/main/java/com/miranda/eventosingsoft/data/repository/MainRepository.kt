@@ -10,7 +10,6 @@ class MainRepository(private val dao: EventoDao) {
     suspend fun insertarEvento(evento: EventoEntity) {
         dao.insertarEvento(evento)
     }
-
     suspend fun actualizarEvento(evento: EventoEntity) = dao.actualizarEvento(evento)
 
     suspend fun eliminarEvento(evento: EventoEntity) = dao.eliminarEvento(evento)
